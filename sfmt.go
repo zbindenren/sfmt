@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// RowHeader is an iterface to format slices.
+// RowHeader is an interface to format slices.
 type RowHeader interface {
 	Header() []string
 	Row() []string
