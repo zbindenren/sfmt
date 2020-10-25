@@ -47,8 +47,18 @@ Black Crows;France;2006
 Faction Skis;Switzerland;2006
 Moment Skis;USA;2003
 `
+
+	expectedCSVNoHeader = `Black Crows;France;2006
+Faction Skis;Switzerland;2006
+Moment Skis;USA;2003
+`
 	expectedTable = `NAME         COUNTRY     ESTABLISHED
 Black Crows  France      2006
+Faction Skis Switzerland 2006
+Moment Skis  USA         2003
+`
+
+	expectedTableNoHeader = `Black Crows  France      2006
 Faction Skis Switzerland 2006
 Moment Skis  USA         2003
 `
@@ -85,7 +95,7 @@ Moment Skis  USA         2003
 )
 
 func TestSliceWriter(t *testing.T) {
-	var tt = []struct {
+	var withHeader = []struct {
 		name     string
 		format   sfmt.Format
 		expected string
@@ -112,13 +122,45 @@ func TestSliceWriter(t *testing.T) {
 		},
 	}
 
-	for i := range tt {
-		tc := tt[i]
+	for i := range withHeader {
+		tc := withHeader[i]
 		b := bytes.NewBufferString("")
 
 		t.Run(tc.name, func(t *testing.T) {
 			s := sfmt.SliceWriter{
 				Writer: b,
+			}
+
+			s.Write(tc.format, companies)
+			assert.Equal(t, tc.expected, b.String())
+		})
+	}
+
+	var noHeader = []struct {
+		name     string
+		format   sfmt.Format
+		expected string
+	}{
+		{
+			"csv",
+			sfmt.CSV,
+			expectedCSVNoHeader,
+		},
+		{
+			"table",
+			sfmt.Table,
+			expectedTableNoHeader,
+		},
+	}
+
+	for i := range noHeader {
+		tc := noHeader[i]
+		b := bytes.NewBufferString("")
+
+		t.Run(tc.name, func(t *testing.T) {
+			s := sfmt.SliceWriter{
+				Writer:    b,
+				NoHeaders: true,
 			}
 
 			s.Write(tc.format, companies)
